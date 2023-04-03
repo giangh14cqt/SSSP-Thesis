@@ -13,7 +13,6 @@ int main() {
     g1.add_edge(2, 4, 3);
     g1.add_edge(3, 4, 2);
     g1.dijkstra(0);
-    cout << g1.get_shortest_distance(1);
     assert(g1.get_shortest_distance(1) == 2);
     assert(g1.get_shortest_distance(2) == 3);
     assert(g1.get_shortest_distance(3) == 4);
