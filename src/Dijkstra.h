@@ -22,18 +22,12 @@ class Graph {
     adj_list.resize(V);
   }
 
-  // Destructor
-  ~Graph() {
-    delete &adj_list;
-    delete &dist;
-  }
-
   // Add a directed edge from node u to node v with weight w
   void add_edge(int u, int v, int w) { adj_list[u].push_back({v, w}); }
 
   // Execute the Dijkstra algorithm from source
   void dijkstra(int source) {
-    vector<int> dist(V, INF);    // Distance from source to each vertex
+    dist.assign(V, INF);         // Distance from source to each vertex
     vector<bool> vis(V, false);  // Visited flag for each vertex
     dist[source] = 0;
     priority_queue<pair<int, int>, vector<pair<int, int>>,
