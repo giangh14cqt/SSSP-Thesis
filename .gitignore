@@ -32,3 +32,5 @@
 *.app
 
 .vscode
+
+test_dijkstra
