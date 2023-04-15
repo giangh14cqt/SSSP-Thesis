@@ -1,6 +1,6 @@
 # Single Source Shortest Path Algorithms
 
-This repository contains implementations of three popular Single Source Shortest Path (SSSP) algorithms: Dijkstra's algorithm, Bellman-Ford algorithm, Floyd-Warshall algorithm and Las Vegas algorithm. These algorithms are commonly used in graph theory and have many applications in various fields, such as transportation networks, social networks, and computer networks.
+This repository contains implementations of three popular Single Source Shortest Path (SSSP) algorithms and a new randomized algorithm: Dijkstra's algorithm, Bellman-Ford algorithm, Floyd-Warshall algorithm and Las Vegas algorithm. These algorithms are commonly used in graph theory and have many applications in various fields, such as transportation networks, social networks, and computer networks.
 
 ## Getting Started
 
