@@ -87,6 +87,7 @@ vector<iii> LDD(Graph &G, int d)
         {
             vector<iii> res = G.get_adj_list_as_iii();
             // todo
+            get_cross_e(erem, res);
             return erem;
         }
         // line 16
