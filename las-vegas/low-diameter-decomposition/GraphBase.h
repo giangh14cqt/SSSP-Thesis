@@ -79,8 +79,8 @@ public:
     }
 
 /**
- * @brief Get the number of nodes in the graph
- * @return The number of nodes in the graph
+ * @brief Get the number of vertices in the original graph
+ * @return The number of vertices in the original graph
 */
     int get_V()
     {

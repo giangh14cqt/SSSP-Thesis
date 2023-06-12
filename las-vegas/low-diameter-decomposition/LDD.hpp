@@ -3,7 +3,7 @@
 
 #include "GraphBase.h"
 
-const int C = 5; // constant for LDD
+const int64_t C = 50000; // constant for LDD
 
 /**
  * @brief Low Diameter Decomposition

@@ -1,5 +1,7 @@
 #include "LDD.hpp"
 
+#include <map>
+
 // Randomized algorithm low diameter decomposition with radius r, return the list of Erem
 // The implementation is based on 2203.03456 page 16
 vector<iii> LDD(Graph &G, int d)
@@ -14,7 +16,7 @@ vector<iii> LDD(Graph &G, int d)
     vector<iii> erem;
     Graph G0 = G.clone();
     // line 3
-    int k = C * log1p(n);
+    int64_t k = C * log1p(n);
     // line 4
     vector<int> active_nodes = G.get_active_nodes();
     vector<int> S;
@@ -24,9 +26,7 @@ vector<iii> LDD(Graph &G, int d)
         S.push_back(active_nodes[v]);
     }
     sort(S.begin(), S.end());
-    // unique S
     S.erase(unique(S.begin(), S.end()), S.end());
-
     // line 5
     vector<vector<int>> ball_in(n, vector<int>());
     vector<vector<int>> ball_out(n, vector<int>());
@@ -38,23 +38,29 @@ vector<iii> LDD(Graph &G, int d)
     // line 6
     vector<vector<int>> ball_in_cross(n, vector<int>());
     vector<vector<int>> ball_out_cross(n, vector<int>());
+    map<int, int> ball_in_size;
+    map<int, int> ball_out_size;
     for (int v : active_nodes)
     {
-        ball_in_cross[v] = get_cross(computer_ball_in(G, v, d / 4), S);
-        ball_out_cross[v] = get_cross(computer_ball_out(G, v, d / 4), S);
+        vector<int> ball_in_v = computer_ball_in(G, v, d / 4);
+        vector<int> ball_out_v = computer_ball_out(G, v, d / 4);
+        ball_in_cross[v] = get_cross(ball_in_v, S);
+        ball_out_cross[v] = get_cross(ball_out_v, S);
+        ball_in_size[v] = ball_in_v.size();
+        ball_out_size[v] = ball_out_v.size();
     }
     // line 7
     for (int v : active_nodes)
     {
         // line 8
         // if (ball_in_cross[v].size() <= 0.6 * k)
-        if (ball_in_cross[v].size() <= 0.7 * nodes_num)
+        if (ball_in_size[v] <= 0.7 * nodes_num)
         {
             weight[v] = Weight::IN_LIGHT;
         }
         // line 9
         // else if (ball_out_cross[v].size() <= 0.6 * k)
-        else if (ball_out_cross[v].size() <= 0.7 * nodes_num)
+        else if (ball_out_size[v] <= 0.7 * nodes_num)
         {
             weight[v] = Weight::OUT_LIGHT;
         }
@@ -65,7 +71,7 @@ vector<iii> LDD(Graph &G, int d)
         }
     }
     // line 11
-    double p = min(1.0, 80 * log2(n) / d);
+    double p = min(1.0, 4*log2(n) / d);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::geometric_distribution<int> distr(p);
@@ -82,11 +88,12 @@ vector<iii> LDD(Graph &G, int d)
         vector<iii> e_boundary;
         e_boundary = get_boundary(G, ball_in_rv, ball_out_rv);
         // line 15
+        int ball_in_out_size = get_cross(ball_in_rv, ball_out_rv).size();
         if (rv > d / 4.0 ||
-            ball_in_rv.size() > 0.7 * G.get_active_nodes().size())
+            ball_in_out_size > 0.7 * G.get_active_nodes().size())
         {
+            cout << rv << ' ' << d/4.0 << endl;
             vector<iii> res = G.get_adj_list_as_iii();
-            // todo
             get_cross_e(erem, res);
             return erem;
         }
@@ -127,7 +134,6 @@ vector<int> get_cross(vector<int> a, vector<int> b)
     return a;
 }
 
-
 void get_cross_e(vector<iii> &erem, vector<iii> e_other)
 {
     erem.insert(erem.end(), e_other.begin(), e_other.end());
@@ -153,19 +159,11 @@ vector<iii> get_boundary(Graph &G, vector<int> &ball_in, vector<int> &ball_out)
 
             if (is_in(u, ball_out) && !is_in(v, ball_out))
             {
-                // boundary[u].push_back(make_pair(v, w));
-                if (u < v)
-                    boundary.push_back({u, v, w});
-                else
-                    boundary.push_back({v, u, w});
+                boundary.push_back({u, v, w});
             }
             else if (!is_in(u, ball_in) && is_in(v, ball_in))
             {
-                // boundary[u].push_back(make_pair(v, w));
-                if (u < v)
-                    boundary.push_back({u, v, w});
-                else
-                    boundary.push_back({v, u, w});
+                boundary.push_back({u, v, w});
             }
         }
     }
@@ -192,7 +190,8 @@ vector<int> computer_ball_in(Graph &G, int s, int d)
     vector<int> dist(n, INF);
     priority_queue<ii, vector<ii>, greater<ii>> pq;
     dist[s] = 0;
-    pq.push(make_pair(0, s));
+    if (G.is_active(s))
+        pq.push(make_pair(0, s));
     while (!pq.empty())
     {
         int w = pq.top().first;
@@ -226,7 +225,8 @@ vector<int> computer_ball_out(Graph &G, int s, int d)
     vector<int> dist(n, INF);
     priority_queue<ii, vector<ii>, greater<ii>> pq;
     dist[s] = 0;
-    pq.push(make_pair(0, s));
+    if (G.is_active(s))
+        pq.push(make_pair(0, s));
     while (!pq.empty())
     {
         int w = pq.top().first;
