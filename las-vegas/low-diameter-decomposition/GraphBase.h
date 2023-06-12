@@ -104,7 +104,7 @@ public:
     }
 
 /**
- * @brief Get the list of 
+ * @brief Get the list of edges
 */
     vector<vector<pair<int, int>>> get_adj_list()
     {
