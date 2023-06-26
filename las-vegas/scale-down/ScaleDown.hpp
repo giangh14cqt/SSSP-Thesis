@@ -3,6 +3,8 @@
 
 #include "../GraphBase.h"
 #include "../low-diameter-decomposition/LDD.hpp"
+#include "FixDAGEdges.hpp"
+#include "ElimNeg.hpp"
 
 /**
  * @brief Scale Down algorithm

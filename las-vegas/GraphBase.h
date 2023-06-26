@@ -267,6 +267,7 @@ public:
             new_active_nodes.push_back(u);
         }
         active_nodes = new_active_nodes;
+        this->remove_redundant_edges();
     }
 
     /**
@@ -386,7 +387,7 @@ public:
      * @param P The set of edges to be removed
      * @return The SCCs graph with SCC as nodes and labled as the index of the component in P
      */
-    Graph removeEdges(vector<iii> &Erem)
+    Graph remove_edges(vector<iii> &Erem)
     {
         Graph G(V);
         G.active_nodes = active_nodes;
@@ -419,14 +420,34 @@ public:
             {
                 for (auto [v, w] : adj_list[u])
                 {
-                    if (!is_active(v))
-                        continue;
                     if (binary_search(SCCs[i].begin(), SCCs[i].end(), v))
                         G.add_edge(u, v, w);
                 }
             }
         }
         return G;
+    }
+
+    /**
+     * @brief Get a Graph based on a given graph with edges that only inside each SCC
+     * @param SCCs The list of SCCs
+     * @return The graph with edges that only inside each SCC
+     */
+    Graph do_phi_filter(vector<int> &phi)
+    {
+        Graph G(V);
+        G.active_nodes = active_nodes;
+        G.adj_list = adj_list;
+        for (auto u : active_nodes)
+        {
+            for (int i = 0; i < G.adj_list[u].size(); i++)
+            {
+                int v = G.adj_list[u][i].first;
+                G.adj_list[u][i].second += phi[u] - phi[v];
+                G.adj_list_rev[v].push_back({u, G.adj_list[u][i].second});
+            }
+        }
+
     }
 };
 
