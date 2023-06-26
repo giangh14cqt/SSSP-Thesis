@@ -33,4 +33,5 @@
 
 .vscode
 
-test_dijkstra
+test*
+.pytest_cache
