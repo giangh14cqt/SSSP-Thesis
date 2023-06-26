@@ -4,10 +4,11 @@
 
 // Randomized algorithm low diameter decomposition with radius r, return the list of Erem
 // The implementation is based on 2203.03456 page 16
-vector<iii> LDD(Graph &G, int d)
+vector<iii> LDD(Graph &G_, int d)
 {
     // Set up
     std::srand(std::time(nullptr)); // seed the random number generator
+    Graph G = G_.clone();
     // line 1
     int n = G.get_V();
     int nodes_num = G.get_active_nodes().size();
@@ -53,14 +54,14 @@ vector<iii> LDD(Graph &G, int d)
     for (int v : active_nodes)
     {
         // line 8
-        // if (ball_in_cross[v].size() <= 0.6 * k)
-        if (ball_in_size[v] <= 0.7 * nodes_num)
+        if (ball_in_cross[v].size() <= 0.6 * k)
+        // if (ball_in_size[v] <= 0.7 * nodes_num)
         {
             weight[v] = Weight::IN_LIGHT;
         }
         // line 9
-        // else if (ball_out_cross[v].size() <= 0.6 * k)
-        else if (ball_out_size[v] <= 0.7 * nodes_num)
+        else if (ball_out_cross[v].size() <= 0.6 * k)
+        // else if (ball_out_size[v] <= 0.7 * nodes_num)
         {
             weight[v] = Weight::OUT_LIGHT;
         }
@@ -70,13 +71,14 @@ vector<iii> LDD(Graph &G, int d)
             weight[v] = Weight::HEAVY;
         }
     }
-    // line 11
+    // line 11 - pre set up
     double p = min(1.0, 80 * log2(n) / d);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::geometric_distribution<int> distr(p);
-    int v = contain_light(weight, G);
 
+    // line 11
+    int v = contain_light(weight, G);
     while (v != -1)
     {
         // line 12
@@ -92,9 +94,8 @@ vector<iii> LDD(Graph &G, int d)
         if (rv > d / 4.0 ||
             ball_in_out_size > 0.7 * G.get_active_nodes().size())
         {
-            cout << rv << ' ' << d/4.0 << endl;
-            vector<iii> res = G.get_adj_list_as_iii();
-            get_cross_e(erem, res);
+            // return G.get_adj_list_as_iii();
+            get_cross_e(erem, G.get_adj_list_as_iii());
             return erem;
         }
         // line 16
@@ -119,6 +120,8 @@ vector<iii> LDD(Graph &G, int d)
     if (!is_sub_set(ball_in_g0, G.get_active_nodes()) ||
         !is_sub_set(ball_out_g0, G.get_active_nodes()))
     {
+        // get_cross_e(erem, G.get_adj_list_as_iii());
+        // return erem;
         return G.get_adj_list_as_iii();
     }
     return erem;
@@ -172,10 +175,8 @@ vector<iii> get_boundary(Graph &G, vector<int> &ball_in, vector<int> &ball_out)
 
 int contain_light(vector<Weight> &weight, Graph &G)
 {
-    for (int i = 0; i < weight.size(); i++)
+    for (int i : G.get_active_nodes())
     {
-        if (!G.is_active(i))
-            continue;
         if (weight[i] == Weight::IN_LIGHT || weight[i] == Weight::OUT_LIGHT)
             return i;
     }
@@ -255,12 +256,12 @@ vector<int> computer_ball_out(Graph &G, int s, int d)
 bool is_sub_set(const vector<int> &a, const vector<int> &b)
 {
     for (int i : a)
-        if (find(b.begin(), b.end(), i) == b.end())
+        if (binary_search(b.begin(), b.end(), i))
             return false;
     return true;
 }
 
 bool is_in(int x, const vector<int> &a)
 {
-    return find(a.begin(), a.end(), x) != a.end();
+    return binary_search(a.begin(), a.end(), x);
 }

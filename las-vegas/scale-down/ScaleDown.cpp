@@ -1,6 +1,6 @@
 #include "ScaleDown.hpp"
 
-Graph ScaleDown(Graph &G, int64_t detal, int64_t B)
+double ScaleDown(Graph &G, int64_t detal, int64_t B)
 {
     // Set up
     vector<int> phi(G.get_V(), -1);
@@ -14,6 +14,13 @@ Graph ScaleDown(Graph &G, int64_t detal, int64_t B)
     {
         // line 3
         int64_t d = detal / 2;
-        Graph GB = G.BFilter(B);
+        Graph GB = G.clone();
+        GB.doBFilter(B);
+        // line 4
+        vector<iii> Erem = LDD(GB, d * B);
+        // line 5
+        // TODO: implement this
+        // line 6
+        
     }
 }

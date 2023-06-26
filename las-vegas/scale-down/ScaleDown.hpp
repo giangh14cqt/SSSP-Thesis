@@ -2,6 +2,7 @@
 #define SD_H
 
 #include "../GraphBase.h"
+#include "../low-diameter-decomposition/LDD.hpp"
 
 /**
  * @brief Scale Down algorithm
@@ -9,6 +10,6 @@
  * @param detal The detal of the scale down
  * @param B 
 */
-Graph ScaleDown(Graph &G, int64_t detal, int64_t B);
+double ScaleDown(Graph &G, int64_t detal, int64_t B);
 
 #endif // SD_H

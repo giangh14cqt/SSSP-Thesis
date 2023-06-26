@@ -9,6 +9,7 @@ const int64_t C = 50000; // constant for LDD
  * @brief Low Diameter Decomposition
  * @param G The origin graph
  * @param d The diameter of the LDD
+ * @return The edge set of the LDD with format {u, v, w} - from u to v with weight w
 */
 vector<iii> LDD(Graph &G, int d);
 
