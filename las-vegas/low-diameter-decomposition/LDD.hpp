@@ -1,7 +1,7 @@
 #ifndef LDD_H
 #define LDD_H
 
-#include "GraphBase.h"
+#include "../GraphBase.h"
 
 const int64_t C = 50000; // constant for LDD
 

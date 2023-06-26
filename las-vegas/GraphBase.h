@@ -178,6 +178,13 @@ public:
         }
         return adj_list_as_iii;
     }
+
+    Graph BFilter(int64_t B)
+    {
+        Graph G = this->clone();
+        
+        return G;
+    }
 };
 
 #endif // GRAPHBASE_H

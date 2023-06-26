@@ -71,7 +71,7 @@ vector<iii> LDD(Graph &G, int d)
         }
     }
     // line 11
-    double p = min(1.0, 4*log2(n) / d);
+    double p = min(1.0, 80 * log2(n) / d);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::geometric_distribution<int> distr(p);

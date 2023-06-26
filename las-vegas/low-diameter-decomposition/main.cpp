@@ -17,7 +17,7 @@ int main(int argc, char *args[])
         infile >> u >> v >> w;
         G.add_edge(u, v, w);
     }
-    int d = 400;
+    int d = 200;
     vector<iii> ldd = LDD(G, d);
     for (auto tup : ldd)
     {
