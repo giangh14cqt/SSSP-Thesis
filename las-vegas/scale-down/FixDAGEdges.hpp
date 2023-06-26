@@ -3,6 +3,6 @@
 
 #include "../GraphBase.h"
 
-int64_t FixDAGEdges(Graph &G, vector<vector<int>> &P);
+vector<int> FixDAGEdges(Graph &G, vector<vector<int>> &P);
 
 #endif // FDE_H

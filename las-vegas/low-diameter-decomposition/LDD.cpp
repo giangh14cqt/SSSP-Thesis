@@ -99,16 +99,16 @@ vector<iii> LDD(Graph &G_, int d)
             return erem;
         }
         // line 16
+        vector<int> ball_in_out_rv = get_cross(ball_in_rv, ball_out_rv);
         vector<iii> e_recurse;
-        Graph G_ball = Graph(G, get_cross(ball_in_rv, ball_out_rv));
+        Graph G_ball = Graph(G, ball_in_out_rv);
 
         e_recurse = LDD(G_ball, d);
         // line 17
         get_cross_e(erem, e_boundary);
         get_cross_e(erem, e_recurse);
         // line 18
-        G.remove(ball_in_rv);
-        G.remove(ball_out_rv);
+        G.remove(ball_in_out_rv);
 
         v = contain_light(weight, G);
     }

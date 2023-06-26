@@ -9,6 +9,7 @@
 #include <random>
 #include <algorithm>
 #include <map>
+#include <stack>
 
 #define ii pair<int, int>        // (node, distance_from_source) or (node, weight)
 #define iii tuple<int, int, int> // (node_u, node_v, weight)
@@ -117,6 +118,86 @@ public:
                 }
             }
         }
+    }
+
+    /**
+     * @brief Get the strongly connected components of the graph using Kosaraju's algorithm
+     * @return The list of strongly connected components as a list of super nodes - each super node is a list of nodes
+     */
+    vector<vector<int>> get_SCCs()
+    {
+        vector<vector<int>> SCCs;
+        vector<int> SCC;
+        vector<bool> visited(V, false);
+        stack<int> S;
+        this->remove_redundant_edges();
+        for (auto head : active_nodes)
+        {
+            if (visited[head])
+                continue;
+            kosaraju_dfs_first(head, visited, S);
+        }
+        visited.assign(V, false);
+        while (!S.empty())
+        {
+            int u = S.top();
+            S.pop();
+            if (visited[u])
+                continue;
+            kosaraju_dfs_second(u, visited, SCC);
+            sort(SCC.begin(), SCC.end());
+            SCCs.push_back(SCC);
+            SCC.clear();
+        }
+        return SCCs;
+    }
+
+    void kosaraju_dfs_second(int u, vector<bool> &visited, vector<int> &SCC)
+    {
+        visited[u] = true;
+        SCC.push_back(u);
+        for (auto [v, w] : adj_list_rev[u])
+        {
+            if (!visited[v])
+                kosaraju_dfs_second(v, visited, SCC);
+        }
+    }
+
+    void kosaraju_dfs_first(int u, vector<bool> &visited, stack<int> &S)
+    {
+        visited[u] = true;
+        for (auto [v, w] : adj_list[u])
+        {
+            if (!visited[v])
+                kosaraju_dfs_first(v, visited, S);
+        }
+        S.push(u);
+    }
+
+    /***
+     * @brief Remove all edges that are not active
+     */
+    void remove_redundant_edges()
+    {
+        for (int u = 0; u < V; u++)
+        {
+            vector<ii> new_adj;
+            if (is_active(u))
+            {
+                for (auto [v, w] : adj_list[u])
+                {
+                    if (!is_active(v))
+                        continue;
+                    new_adj.push_back({v, w});
+                }
+            }
+            adj_list[u] = new_adj;
+        }
+        adj_list_rev.clear();
+        adj_list_rev.resize(V);
+        for (auto u : active_nodes)
+            for (auto [v, w] : adj_list[u])
+                adj_list_rev[v].push_back({u, w});
     }
 
     /***
@@ -297,6 +378,55 @@ public:
             }
         }
         return topo_order;
+    }
+
+    /**
+     * @brief Get a Graph based on a given graph by removing a set of edges
+     * @param G The origin graph
+     * @param P The set of edges to be removed
+     * @return The SCCs graph with SCC as nodes and labled as the index of the component in P
+     */
+    Graph removeEdges(vector<iii> &Erem)
+    {
+        Graph G(V);
+        G.active_nodes = active_nodes;
+        for (auto u : active_nodes)
+        {
+            for (auto [v, w] : adj_list[u])
+            {
+                if (!is_active(v))
+                    continue;
+                if (binary_search(Erem.begin(), Erem.end(), make_tuple(u, v, w)))
+                    continue;
+                G.add_edge(u, v, w);
+            }
+        }
+        return G;
+    }
+
+    /**
+     * @brief Get a Graph based on a given graph with edges that only inside each SCC
+     * @param SCCs The list of SCCs
+     * @return The graph with edges that only inside each SCC
+     */
+    Graph get_graph_inside_SCCs(vector<vector<int>> SCCs)
+    {
+        Graph G(V);
+        G.active_nodes = active_nodes;
+        for (int i = 0; i < SCCs.size(); ++i)
+        {
+            for (auto u : SCCs[i])
+            {
+                for (auto [v, w] : adj_list[u])
+                {
+                    if (!is_active(v))
+                        continue;
+                    if (binary_search(SCCs[i].begin(), SCCs[i].end(), v))
+                        G.add_edge(u, v, w);
+                }
+            }
+        }
+        return G;
     }
 };
 

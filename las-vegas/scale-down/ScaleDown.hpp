@@ -10,6 +10,6 @@
  * @param detal The detal of the scale down
  * @param B 
 */
-double ScaleDown(Graph &G, int64_t detal, int64_t B);
+vector<int> ScaleDown(Graph &G, int64_t detal, int64_t B);
 
 #endif // SD_H
