@@ -35,3 +35,6 @@
 
 test*
 .pytest_cache
+
+ldd
+output.txt
