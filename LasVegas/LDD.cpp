@@ -1,20 +1,13 @@
-#ifndef LDD_H
-#define LDD_H
-
 #include "LDD.hpp"
 
 using namespace std;
 
-double CALCULATE_SCC_PROB = 1;
+double CALCULATE_SCC_PROB = 0.0; // need to be rechecked
 int LDD_BASE_CASE = 10;
 
-// class LowDiameterDecomposition
-// {
 vector<vector<int>> preLDD(Graph &g, int d)
 {
-    srand(time(nullptr)); // seed the random number generator
-
-    double r = ((double)rand() / (RAND_MAX)) + 1;
+    double r = ((double)Random::Get().GenInt() / (RAND_MAX));
     if (r < CALCULATE_SCC_PROB)
         return LDD(g, d);
 
@@ -23,6 +16,8 @@ vector<vector<int>> preLDD(Graph &g, int d)
 
     if (SCCs.size() == 1)
         return LDD(g, d);
+
+    cout << "SCC size: " << SCCs.size() << endl;
 
     for (vector<int> SCC : SCCs)
     {
@@ -138,6 +133,12 @@ vector<vector<int>> LDD(Graph &g, int d)
         return vector<vector<int>>();
 
     vector<int> condAndi_max = CoreOrLayerRange(g, g_rev, s, d);
+
+    cout << "condAndi_max: ";
+    for (int i : condAndi_max)
+        cout << i << " ";
+    cout << endl;
+
     if (condAndi_max[0] == 1)
         return RandomTrim(g, g_rev, s, d);
 
@@ -157,7 +158,11 @@ vector<vector<int>> LDD(Graph &g, int d)
         Graph subGraph = getSubGraph(g, ball, false);
         Graph minusSubGraph = getSubGraph(g, ball, true);
 
-        return edgeUnion(layer(g, ball), preLDD(subGraph, d), preLDD(minusSubGraph, d));
+        // return edgeUnion(layer(g, ball), preLDD(subGraph, d), preLDD(minusSubGraph, d));
+        vector<vector<int>> layer_g = layer(g, ball);
+        vector<vector<int>> preLDD_subGraph = preLDD(subGraph, d);
+        vector<vector<int>> preLDD_minusSubGraph = preLDD(minusSubGraph, d);
+        return edgeUnion(layer_g, preLDD_subGraph, preLDD_minusSubGraph);
     }
 
     if (condAndi_max[0] == 3)
@@ -365,10 +370,8 @@ int diffVertex(vector<int> &set1, vector<int> &set2, int v_max)
 // OUTPUT: a pair (Condition,i) where Condition ∈ {1,2,3} and i ≤ D is a
 // non-negative integer such that
 // – if Condition = 1 then n_G(s,i) > 2n and n_G_rev(s,i) > 2n,
-// - if Condition = 2 then n_G(s, i) ≤ 2n and Vol_G(s, i) and Vol_G(s, i −
-// ⌈D/(3lgn)⌉) are the same canonical range,
-// – if Condition = 3 then n_G_rev(s, i) ≤ 2n and Vol_G_rev(s, i) and
-// Vol_G_rev(s, i − ⌈D/(3lgn)⌉) are in the same canonical range.
+// - if Condition = 2 then n_G(s, i) ≤ 2n and Vol_G(s, i) and Vol_G(s, i − ⌈D/(3lgn)⌉) are the same canonical range,
+// – if Condition = 3 then n_G_rev(s, i) ≤ 2n and Vol_G_rev(s, i) and Vol_G_rev(s, i − ⌈D/(3lgn)⌉) are in the same canonical range.
 // If Condition ∈ {2, 3} then i ≥ D/(3lgn).
 // Runs LayerRange on G and G_rev in parallel.
 vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
@@ -376,6 +379,7 @@ vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
     vector<vector<int>> farthestDistancesSeen;
     vector<vector<int>> farthestDistancesSeen_rev;
     double constant = d / (3.0 * log(g.n));
+    cout << "Constant: " << constant << endl;
     vector<bool> settled(g.v_max, false);
     vector<bool> settled_rev(g.v_max, false);
     int numSettled = 0;
@@ -395,10 +399,10 @@ vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
 
     while (true)
     {
-        if (numSettled = g.n)
+        if (numSettled == g.n)
             finished = true;
 
-        if (numSettled_rev = g_rev.n)
+        if (numSettled_rev == g_rev.n)
             finished_rev = true;
 
         if (finished && finished_rev)
@@ -413,6 +417,10 @@ vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
         if (!finished)
         {
             vector<int> result = oneIterationLayerRange(g, pq, settled, numSettled, farthestDistancesSeen, constant, dist, d);
+            cout << "Farthest distances seen: ";
+            for (vector<int> i : farthestDistancesSeen)
+                cout << i[0] << "-" << i[1] << " ";
+            cout << endl;
             if (!result.empty())
             {
                 if (result[0] == 1)
@@ -432,6 +440,10 @@ vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
         if (!finished_rev)
         {
             vector<int> result_rev = oneIterationLayerRange(g_rev, pq_rev, settled_rev, numSettled_rev, farthestDistancesSeen_rev, constant, dist_rev, d);
+            cout << "Farthest distances seen rev: ";
+            for (vector<int> i : farthestDistancesSeen_rev)
+                cout << i[0] << "-" << i[1] << " ";
+            cout << endl;
             if (!result_rev.empty())
             {
                 if (result_rev[0] == 1)
@@ -450,6 +462,7 @@ vector<int> CoreOrLayerRange(Graph &g, Graph &g_rev, int s, int d)
     }
 }
 
+// Checked
 Graph createGRev(Graph &g)
 {
     Graph g_rev(g.v_max, false);
@@ -475,8 +488,14 @@ Graph createGRev(Graph &g)
     return g_rev;
 }
 
-vector<int> oneIterationLayerRange(Graph &g, priority_queue<Node> &pq, vector<bool> &settled,
-                                   int numSettled, vector<vector<int>> &farthestDistancesSeen, double constant, vector<int> &dist, int d)
+vector<int> oneIterationLayerRange(Graph &g,
+                                   priority_queue<Node> &pq,
+                                   vector<bool> &settled,
+                                   int numSettled,
+                                   vector<vector<int>> &farthestDistancesSeen,
+                                   double constant,
+                                   vector<int> &dist,
+                                   int d)
 {
     if (pq.empty())
     {
@@ -499,6 +518,7 @@ vector<int> oneIterationLayerRange(Graph &g, priority_queue<Node> &pq, vector<bo
         return vector<int>();
 
     settled[u] = true;
+
     if (farthestDistancesSeen.size() == 0 || dist[u] > farthestDistancesSeen[farthestDistancesSeen.size() - 1][0])
     {
         farthestDistancesSeen.push_back(vector<int>{dist[u], numSettled + 1});
@@ -519,13 +539,17 @@ vector<int> oneIterationLayerRange(Graph &g, priority_queue<Node> &pq, vector<bo
     return vector<int>();
 }
 
+// checked
+// Checks whether Vol_G(s, i - ceil[D/(3logn)]) and Vol_G(s, i) are in the same canonical range.
+// Two numbers are in the same canonical range if they lie in the same half-open interval
+// [2^j, 2^{j+1}), where j is a non-negative integer.
 bool sameCanonicalRange(vector<vector<int>> &farthestDistancesSeen, double constant)
 {
     int i = farthestDistancesSeen[farthestDistancesSeen.size() - 1][0];
     int vol1 = farthestDistancesSeen[farthestDistancesSeen.size() - 1][1];
 
     for (int j = farthestDistancesSeen.size() - 2; j >= 0; j--)
-        if (farthestDistancesSeen[j][0] < i - ceil(constant))
+        if (farthestDistancesSeen[j][0] <= i - ceil(constant))
         {
             int vol2 = farthestDistancesSeen[j][1];
             if (floor(log(vol1) / log(2)) == floor(log(vol2) / log(2)))
@@ -535,6 +559,8 @@ bool sameCanonicalRange(vector<vector<int>> &farthestDistancesSeen, double const
     return false;
 }
 
+// checked
+// returns the edges (u, v) where u is in ball and v is not in ball
 vector<vector<int>> layer(Graph &g, vector<int> &ball)
 {
     vector<bool> contains(g.v_max, false);
@@ -552,8 +578,8 @@ vector<vector<int>> layer(Graph &g, vector<int> &ball)
     return edges;
 }
 
-// returns all the vertices in g within a distance of r from source vertex s
-// using Dijkstra's
+// checked
+// returns all the vertices in g within a distance of r from source vertex s using Dijkstra's
 vector<int> volume(Graph &g, int s, int r)
 {
     vector<int> output;
@@ -584,6 +610,7 @@ vector<int> volume(Graph &g, int s, int r)
     return output;
 }
 
+// checked
 vector<int> Dijkstra(Graph &g, int s)
 {
     vector<bool> settled(g.v_max, false);
@@ -614,6 +641,7 @@ vector<int> Dijkstra(Graph &g, int s)
 
 // void init(Graph g, priority_queue<Node> pq, vector<int> dist, int s);
 
+// checked
 void updateNeighbors(Graph &g, int u, vector<bool> &settled, priority_queue<Node> &pq, vector<int> &dist, int d)
 {
     for (int i = 0; i < g.adjacencyList[u].size(); i++)
@@ -625,11 +653,9 @@ void updateNeighbors(Graph &g, int u, vector<bool> &settled, priority_queue<Node
 
             dist[v] = min(dist[v], newDistance);
 
-            if (dist[v] < d)
+            // only want to process nodes within a distance of d from the source
+            if (dist[v] <= d)
                 pq.push(Node(v, dist[v]));
         }
     }
 }
-// };
-
-#endif // LDD_H

@@ -1,99 +1,135 @@
 #ifndef LasVegas_H
 #define LasVegas_H
 
-#include "LDD.h"
+#include "LDD.hpp"
 
 using namespace std;
 
-class LasVegas
+// class LasVegas
+// {
+double startTime;
+// double CALCULATE_SCC_PROB = 1;
+int NUM_FLAGS = 10;
+
+// flags
+int SRC = 0;
+bool CHECKS = false;
+bool WITH_LDD = false;
+double WEIGHT_METHOD = 0;
+int MAX_VERTEX = 0;
+int RANDOM_SEED = 0;
+bool DISPLAY_TREE = false;
+bool PRINT_LDD_SIZE = false;
+bool MAKE_CONNECTED = false;
+
+// void main();
+
+Graph readInput(ifstream &inputFile)
 {
-    double startTime;
-    double CALCULATE_SCC_PROB = 1;
-    int NUM_FLAGS = 10;
+    int g_size;
+    int maxWeight;
+    inputFile >> g_size >> maxWeight;
+    ++g_size;
+    // vector<int> phi = createRandomPriceFunction(g_size, maxWeight);
 
-    // flags
-    int SRC = 0;
-    bool CHECKS = false;
-    bool WITH_LDD = false;
-    double WEIGHT_METHOD = 0;
-    int MAX_VERTEX = 0;
-    int RANDOM_SEED = 0;
-    bool DISPLAY_TREE = false;
-    bool PRINT_LDD_SIZE = false;
-    bool MAKE_CONNECTED = false;
+    Graph g(g_size, false);
+    vector<vector<int>> edges(g_size);
+    vector<vector<int>> weights(g_size);
 
-    void main();
+    vector<vector<bool>> edge_exists(g_size, vector<bool>(g_size, false));
+    int u, v, w;
+    while (inputFile >> u >> v >> w)
+    {
+        if (u > g_size || v > g_size)
+        {
+            cout << "Error: vertex out of bounds" << endl;
+            exit(1);
+        }
+        if (!g.containsVertex[u])
+            g.addVertex(u);
 
-    void readInput();
+        if (!g.containsVertex[v])
+            g.addVertex(v);
 
-    vector<int> createRandomPriceFunction(int g_size, int maxWeight);
+        if (!edge_exists[u][v])
+        {
+            edges[u].push_back(v);
+            weights[u].push_back(w);
+        }
+    }
+    for (int i = 0; i < g_size; i++)
+        g.addEdges(i, edges[i], weights[i]);
+    return g;
+}
 
-    void setFlags();
+vector<int> createRandomPriceFunction(int g_size, int maxWeight);
 
-    vector<int> getEdgeFromLine(string line);
+void setFlags();
 
-    int getWeight(int weight, int u, int v, vector<int> &phi);
+vector<int> getEdgeFromLine(string line);
 
-    vector<int> getMaxSizeWeight();
+int getWeight(int weight, int u, int v, vector<int> &phi);
 
-    Graph getConnectedSubgraph(Graph g);
+vector<int> getMaxSizeWeight();
 
-    void findReachable(Graph g, int u, vector<bool> reachable);
+Graph getConnectedSubgraph(Graph g);
 
-    void runBellmanFord(Graph g);
+void findReachable(Graph g, int u, vector<bool> reachable);
 
-    vector<int> bitScaling(Graph g);
+void runBellmanFord(Graph g);
 
-    void verifyTree(Graph g, vector<int> tree, vector<int> dist, int src);
+vector<int> bitScaling(Graph g);
 
-    bool containCyle(Graph g, vector<vector<bool>> adjList, int src, vector<bool> visited);
+void verifyTree(Graph g, vector<int> tree, vector<int> dist, int src);
 
-    void getDistances(Graph g, vector<int> tree, int curDis, int curVertex, vector<bool> visited);
+bool containCyle(Graph g, vector<vector<bool>> adjList, int src, vector<bool> visited);
 
-    vector<int> SPmain(Graph g, int src);
+void getDistances(Graph g, vector<int> tree, int curDis, int curVertex, vector<bool> visited);
 
-    Graph getScaledGraph(Graph g_in, int scaleFactor);
+vector<int> SPmain(Graph g, int src);
 
-    bool validTree(Graph g, int s, vector<int> tree);
+Graph getScaledGraph(Graph g_in, int scaleFactor);
 
-    int roundPower2(int n);
+bool validTree(Graph g, int s, vector<int> tree);
 
-    double logBase2(int n);
+int roundPower2(int n);
 
-    vector<int> ScaleDown(Graph g, int delta, int B);
+double logBase2(int n);
 
-    vector<vector<int>> SPmainLLD(Graph g, int diameter);
+vector<int> ScaleDown(Graph g, int delta, int B);
 
-    bool hasNegativeEdges(Graph g, vector<int> phi, int B);
+vector<vector<int>> SPmainLLD(Graph g, int diameter);
 
-    Graph createModifiedGB(Graph g, int B, bool nneg, set<vector<int>> remEdges, vector<int> phi);
+bool hasNegativeEdges(Graph g, vector<int> phi, int B);
 
-    set<vector<int>> getEdgesBetweenSCCs(Graph g, vector<int> vertexToSCCMap);
+Graph createModifiedGB(Graph g, int B, bool nneg, set<vector<int>> remEdges, vector<int> phi);
 
-    vector<int> getVertexToSCCMap(vector<vector<int>> SCCs, int numVertices);
+set<vector<int>> getEdgesBetweenSCCs(Graph g, vector<int> vertexToSCCMap);
 
-    vector<int> addPhi(vector<int> phi_1, vector<int> phi_2);
+vector<int> getVertexToSCCMap(vector<vector<int>> SCCs, int numVertices);
 
-    vector<int> FixDAGEdges(Graph g, vector<vector<int>> SCCs,
-                            vector<int> vertexToSCCMap,
-                            set<vector<int>> edgesBetweenSCCs);
+vector<int> addPhi(vector<int> phi_1, vector<int> phi_2);
 
-    vector<vector<int>> createSCCAdjList(vector<vector<int>> SCCs,
-                                         vector<int> vertexToSCCMap,
-                                         set<vector<int>> edgesBetweenSCCs);
+vector<int> FixDAGEdges(Graph g, vector<vector<int>> SCCs,
+                        vector<int> vertexToSCCMap,
+                        set<vector<int>> edgesBetweenSCCs);
 
-    vector<int> topSort(int n, vector<vector<int>> adjList);
+vector<vector<int>> createSCCAdjList(vector<vector<int>> SCCs,
+                                     vector<int> vertexToSCCMap,
+                                     set<vector<int>> edgesBetweenSCCs);
 
-    void topSortUtil(int u, vector<bool> visited, stack<int> &Stack, vector<vector<int>> adjList);
+vector<int> topSort(int n, vector<vector<int>> adjList);
 
-    vector<int> ElimNeg(Graph g);
+void topSortUtil(int u, vector<bool> visited, stack<int> &Stack, vector<vector<int>> adjList);
 
-    Graph createGs(Graph g);
+vector<int> ElimNeg(Graph g);
 
-    vector<int> getShortestPathTree(Graph g, int src);
+Graph createGs(Graph g);
 
-    void updateTreeNeighbors(Graph g, int u, vector<int> tree, set<int> settled,
-                             priority_queue<Node> pq, vector<int> dist);
-};
+vector<int> getShortestPathTree(Graph g, int src);
+
+void updateTreeNeighbors(Graph g, int u, vector<int> tree, set<int> settled,
+                         priority_queue<Node> pq, vector<int> dist);
+// };
 
 #endif // LasVegas_H

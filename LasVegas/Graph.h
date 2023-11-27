@@ -11,6 +11,7 @@
 #include <map>
 #include <stack>
 #include <set>
+#include <fstream>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
         cost = c;
     }
 
-    bool operator < (const Node &n) const
+    bool operator<(const Node &n) const
     {
         return cost < n.cost;
     }
@@ -134,8 +135,9 @@ public:
     // SCC only run on graphs where n == v_max, so needs to create mapping from vertices to [n] first to work
     vector<vector<int>> SCC()
     {
-        vector<int> vertsToN = vector<int>(v_max, -1);
-        vector<int> NtoVerts = vector<int>(n, -1);
+        cout << "Running SCC" << endl;
+        vector<int> vertsToN = vector<int>(v_max, 0);
+        vector<int> NtoVerts = vector<int>(n, 0);
 
         for (int i = 0; i < vertices.size(); ++i)
         {
@@ -145,12 +147,14 @@ public:
 
         vector<int> disc = vector<int>(n, -1);
         vector<int> low = vector<int>(n, -1);
-
         time = 0;
 
         vector<bool> stackMember = vector<bool>(n, false);
         stack<int> st;
+
         vector<vector<int>> SCCverts = vector<vector<int>>();
+
+        this->displayGraph();
 
         for (int i = 0; i < n; ++i)
         {
@@ -162,14 +166,15 @@ public:
                 // SCCUtil(SCCverts, i, low, disc, stackMember, st, vertsToN);
             }
         }
-
+        cout << "Finished SCC" << endl;
         return SCCverts;
     }
 
     vector<vector<int>> SCCUtil(int u, vector<int> &low, vector<int> &disc, vector<bool> &stackMember, stack<int> &st, vector<int> &vertsToN)
     {
         vector<vector<int>> SCCverts = vector<vector<int>>();
-        disc[u] = low[u] = ++time;
+        disc[u] = low[u] = time;
+        time++;
         stackMember[u] = true;
         st.push(u);
 
@@ -197,8 +202,8 @@ public:
             {
                 w = st.top();
                 st.pop();
-                stackMember[w] = false;
                 SCC.push_back(w);
+                stackMember[w] = false;
             }
             SCCverts.push_back(SCC);
         }
